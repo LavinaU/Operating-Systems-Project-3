@@ -14,36 +14,36 @@ public class Header {
     public long nextBlockId;
 
     public Header() {
-        rootBlockId = 0;
-        nextBlockId = 1;
+        this.rootBlockId = 0; // tree empty
+        this.nextBlockId = 1;  // 1st node will be block 1
     }
 
+    public long getRootBlockId() {
+        return rootBlockId;
+    }
+
+    public void setRootBlockId(long rootBlockId) {
+        this.rootBlockId = rootBlockId;
+    }
+
+    public long getNextBlockId() {
+        return nextBlockId;
+    }
+
+    public void setNextBlockId(long nextBlockId) {
+        this.nextBlockId = nextBlockId;
+    }
+
+    // serialize header to 512 bytes bc im from austin
     public byte[] toBytes() {
         ByteBuffer buffer = ByteBuffer.allocate(BLOCK_SIZE);
 
-        buffer.put(MAGIC.getBytes(StandardCharsets.US_ASCII));
-        buffer.putLong(rootBlockId);
-        buffer.putLong(nextBlockId);
+        buffer.put(MAGIC.getBytes(StandardCharsets.US_ASCII)); // 8 bytes
+        buffer.putLong(rootBlockId); // 8 bytes
+        buffer.putLong(nextBlockId); // 8 bytes
 
+        //remaining bytes r unused
         return buffer.array();
-    }
-
-    public static Header fromBytes(byte[] data) {
-        ByteBuffer buffer = ByteBuffer.wrap(data);
-
-        byte[] magicBytes = new byte[8];
-        buffer.get(magicBytes);
-
-        String magic = new String(magicBytes, StandardCharsets.US_ASCII);
-        if (!MAGIC.equals(magic)) {
-            throw new IllegalArgumentException("Invalid index file");
-        }
-
-        Header h = new Header();
-        h.rootBlockId = buffer.getLong();
-        h.nextBlockId = buffer.getLong();
-
-        return h;
     }
 
 
