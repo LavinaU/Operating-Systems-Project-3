@@ -8,3 +8,11 @@ Starting Project 3 for Operating Systems Concepts. I know this is late but I had
 - Initialize Git
 - Create devlog.md
 - Commit initial setup
+
+## 2025-12-12 05:
+### Thoughts
+Got caught up with another task but back on. Going to implement the create command and header file handling
+
+### My Plan
+- implement create
+- initialize index file w/ header
