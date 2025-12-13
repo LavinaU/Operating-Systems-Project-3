@@ -19,7 +19,7 @@ public class Project3 {
             switch (command) {
                 case "create":
                     if (args.length < 2) {
-                        System.out.println("Usage: java Project3 create <filename>");
+                        System.out.println("Usage: java Project3 create <insertFile>");
                         return;
                     }
                     createIndexFile(args[1]);
@@ -27,11 +27,15 @@ public class Project3 {
 
                 case "insert":
                     if (args.length < 4) {
-                        System.out.println("Usage: java Project3 insert <filename> <key> <value>");
+                        System.out.println("Usage: java Project3 insert <insertFile> <key> <value>");
                         return;
                     }
-                    System.out.println("Insert command (TO BE IMPLEMENTED!!t)");
+                    insert(args[1],
+                        Long.parseLong(args[2]),
+                        Long.parseLong(args[3]));
                     break;
+
+
 
                 case "search":
                     System.out.println("Search command (TO BE IMPLEMENTED!!)");
@@ -75,6 +79,46 @@ public class Project3 {
         }
 
     }
+
+    private static void insert(String filename, long key, long value) {
+
+        try {
+            BTreeFile btFile = new BTreeFile(filename, "rw");
+
+            Header header = Header.fromFile(btFile);
+
+            long blockId = header.getNextBlockId();
+
+            BTreeNode node = new BTreeNode(blockId, 0);
+            node.insertKeyValue(key, value);
+
+            btFile.writeBlock(blockId, node.toBytes());
+
+            if (header.getRootBlockId() == 0) {
+                header.setRootBlockId(blockId);
+            }
+
+            header.setNextBlockId(blockId + 1);
+            btFile.writeBlock(0, header.toBytes());
+
+            btFile.close();
+
+            System.out.println(
+                    "Inserted key " + key +
+                            " with value " + value +
+                            " into block " + blockId
+            );
+
+        } catch (Exception e) {
+            System.err.println("Insert failed!!: "+ e.getMessage());
+        }
+
+
+
+
+
+    }
+
 
 
 

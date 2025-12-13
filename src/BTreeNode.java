@@ -1,6 +1,7 @@
 package src;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets; // for letting me specify character encodings when coverting btwn strings & bytes
 
 public class BTreeNode {
 
@@ -59,7 +60,7 @@ public class BTreeNode {
 
         buffer.putLong(blockId);
         buffer.putLong(parentBlockId);
-        buffer.putLong(numKeys);
+        buffer.putLong(numKeys); // store as long for alignment
 
         //write keys (19*8 bytes = 152 bytes)
         for (int i = 0; i < MAX_KEYS; i++) {
@@ -78,6 +79,36 @@ public class BTreeNode {
 
         // the remaining bytes are unused (shld be 512 bytes)
         return buffer.array();
+    }
+
+    // deserialize node from bytes
+    public static BTreeNode fromBytes(byte[] data) {
+        ByteBuffer buffer = ByteBuffer.wrap(data);
+        long blockId = buffer.getLong();
+        long parentBlockId = buffer.getLong();
+        int numKeys = (int) buffer.getLong();
+
+        BTreeNode node = new BTreeNode(blockId, parentBlockId);
+        node.numKeys = numKeys;
+
+        for (int i = 0; i < MAX_KEYS; i++) {
+            node.keys[i] = buffer.getLong();
+        }
+        for (int i = 0; i < MAX_KEYS; i++) {
+            node.values[i] = buffer.getLong();
+        }
+        for (int i = 0; i < MAX_CHILDREN; i++) {
+            node.children[i] = buffer.getLong();
+        }
+
+        return node;
+
+    }
+
+    public void insertKeyValue(long key, long value) {
+        keys[numKeys] = key;
+        values[numKeys] = value;
+        numKeys++;
     }
 
 

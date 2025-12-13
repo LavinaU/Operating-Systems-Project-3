@@ -1,5 +1,6 @@
 package src;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
@@ -76,6 +77,14 @@ public class Header {
         ByteBuffer buffer = ByteBuffer.wrap(header);
         buffer.position(8);
         buffer.putLong(rootId);
+    }
+
+    public static Header fromFile(BTreeFile btFile) throws IOException {
+        byte[] data = btFile.readBlock(0);
+        Header h = new Header();
+        h.rootBlockId = java.nio.ByteBuffer.wrap(data, 8, 8).getLong();
+        h.nextBlockId = java.nio.ByteBuffer.wrap(data, 16, 8).getLong();
+        return h;
     }
 
 }
