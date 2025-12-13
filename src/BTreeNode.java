@@ -13,6 +13,7 @@ public class BTreeNode {
     public long blockId;
     public long parentBlockId;
     public int numKeys;
+
     private long[] keys;
     private long[] values;
     private long[] children ; //block IDs of childre, 0 if leaf
@@ -109,6 +110,26 @@ public class BTreeNode {
         keys[numKeys] = key;
         values[numKeys] = value;
         numKeys++;
+    }
+
+    // insert key/value into a LEAF node in sorted order
+    public void insertIntoLeaf(long key, long value) {
+        int i = numKeys - 1;
+
+        while (i >= 0 && keys[i] > key) {
+            keys[i + 1] = keys[i];
+            values[i + 1] = values[i];
+            i--;
+        }
+
+        keys[i + 1] = key;
+        values[i + 1] = value;
+        numKeys++;
+    }
+
+
+    public boolean isOverflow() {
+        return numKeys > MAX_KEYS;
     }
 
 
