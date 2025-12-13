@@ -1,7 +1,9 @@
 package src;
 
 import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets; // for letting me specify character encodings when coverting btwn strings & bytes
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class BTreeNode {
 
@@ -26,11 +28,7 @@ public class BTreeNode {
         this.keys = new long[MAX_KEYS];
         this.values = new long[MAX_KEYS] ;
         this.children = new long[MAX_CHILDREN];
-
-        //initialize the children to 0
-        for (int i = 0; i < MAX_CHILDREN; i++) {
-            children[i] = 0;
-        }
+        Arrays.fill(children, 0);
     }
 
     // set a key/value at an index that's given
@@ -113,36 +111,81 @@ public class BTreeNode {
     }
 
     public boolean isOverflow() {
-        return numKeys > MAX_KEYS - 1;
+        return numKeys > MAX_KEYS;
     }
 
     // INSERT INTO LEAF SAFELY
     public void insertIntoLeaf(long key, long value) {
         if (numKeys >= MAX_KEYS) {
-            throw new ArrayIndexOutOfBoundsException("Leaf node full, split needed");
+            // should split instead of inserting directly
+            return;
         }
-        keys[numKeys] = key;
-        values[numKeys] = value;
+
+        int i = numKeys - 1;
+        while (i >= 0 && keys[i] > key) {
+            keys[i + 1] = keys[i];
+            values[i + 1] = values[i];
+            i--;
+        }
+        keys[i + 1] = key;
+        values[i + 1] = value;
         numKeys++;
 
     }
 
     //SPLITS THIS LEAF NODE INTO 2 NODES, RETURNS THE NEW RIGHT NODE
     public BTreeNode splitLeaf(long newBlockId) {
+        int mid = (numKeys + 1) / 2; // middle index
+        int rightCount = numKeys - mid; // # of keys for the new right node
+
         BTreeNode right = new BTreeNode(newBlockId, this.parentBlockId);
 
-        int mid = numKeys / 2; // middle index
+        System.arraycopy(keys, mid, right.keys, 0, rightCount);
+        System.arraycopy(values, mid, right.values, 0, rightCount);
+        right.numKeys = rightCount;
 
-        int rightNum = numKeys - mid;
-        for (int i = 0; i < rightNum; i++) {
-            right.keys[i] = this.keys[mid + i];
-            right.values[i] = this.values[mid + i];
-        }
-
-        right.numKeys = rightNum;
-        this.numKeys = mid; // shrink left node
-
+        numKeys = mid; // left keeps first half
         return right;
     }
+
+    // helper, finds child index for a key
+    public int findChildIndex(long key) {
+        for (int i = 0; i < numKeys; i++) {
+            if (key < keys[i]) return i;
+        }
+        return numKeys;
+    }
+
+    // search in this node ro descend
+    public Long searchKey(long key, BTreeFile file) throws Exception {
+        for (int i = 0; i < numKeys; i++) {
+            if (keys[i] == key) return values[i];
+        }
+        // descend if not leaf
+        for (int i = 0; i <= numKeys; i++) {
+            if (children[i] != 0) {
+                BTreeNode child = BTreeNode.fromBytes(file.readBlock(children[i]));
+                Long res = child.searchKey(key, file);
+                if (res != null) return res;
+            }
+        }
+        return null;
+    }
+
+    // in order traversal for printing/extracting
+    public void inOrderTraversal(BTreeFile file, List<String> output) throws Exception {
+        for (int i = 0; i < numKeys; i++) {
+            if (children[i] != 0) {
+                BTreeNode child = BTreeNode.fromBytes(file.readBlock(children[i]));
+                child.inOrderTraversal(file, output);
+            }
+            output.add(keys[i] + "," + values[i]);
+        }
+        if (children[numKeys] != 0) {
+            BTreeNode child = BTreeNode.fromBytes(file.readBlock(children[numKeys]));
+            child.inOrderTraversal(file, output);
+        }
+    }
+
 
 }
