@@ -64,5 +64,6 @@ Okay yay, I think I am ready for my final commit. I need to do the search adn lo
 - print command
 - extract command
 
-
-
+## 2025-12-12 11:40
+### Thoughts
+YAY!!! Everything is fully functional.
