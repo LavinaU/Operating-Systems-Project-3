@@ -9,10 +9,18 @@ Starting Project 3 for Operating Systems Concepts. I know this is late but I had
 - Create devlog.md
 - Commit initial setup
 
-## 2025-12-12 05:
+## 2025-12-12 05:00
 ### Thoughts
 Got caught up with another task but back on. Going to implement the create command and header file handling
 
 ### My Plan
 - implement create
 - initialize index file w/ header
+
+## 2025-12-12 05:30
+### Thoughts
+Create command implementation is done! In a good workflow now. Going to add the first part of real BTree functionality now. Shouldn't take too long.
+
+### My Plan
+- set up BTree node structure & placeholder for insert command
+
