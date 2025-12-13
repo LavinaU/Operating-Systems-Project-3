@@ -53,4 +53,16 @@ Okay it's looking good! Implemented working insert command, header is now read f
 -define node capacity, detect overflow, spilit leaves, update parent/root pointers accordingly
 
  
+## 2025-12-12 10:45
+### Thoughts
+Okay yay, I think I am ready for my final commit. I need to do the search adn load and print and extract commands and do the cleanup. and then it should be all good. and test obviously.
+
+### My Plan
+- search command
+- insert into internal nodes
+- load command
+- print command
+- extract command
+
+
 
