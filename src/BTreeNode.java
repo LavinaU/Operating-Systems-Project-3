@@ -14,9 +14,9 @@ public class BTreeNode {
     public long parentBlockId;
     public int numKeys;
 
-    private long[] keys;
-    private long[] values;
-    private long[] children ; //block IDs of childre, 0 if leaf
+    public long[] keys;
+    public long[] values;
+    public long[] children ; //block IDs of childre, 0 if leaf
 
     // constructor for new node
     public BTreeNode(long blockId, long parentBlockId) {
@@ -112,25 +112,37 @@ public class BTreeNode {
         numKeys++;
     }
 
-    // insert key/value into a LEAF node in sorted order
-    public void insertIntoLeaf(long key, long value) {
-        int i = numKeys - 1;
+    public boolean isOverflow() {
+        return numKeys > MAX_KEYS - 1;
+    }
 
-        while (i >= 0 && keys[i] > key) {
-            keys[i + 1] = keys[i];
-            values[i + 1] = values[i];
-            i--;
+    // INSERT INTO LEAF SAFELY
+    public void insertIntoLeaf(long key, long value) {
+        if (numKeys >= MAX_KEYS) {
+            throw new ArrayIndexOutOfBoundsException("Leaf node full, split needed");
+        }
+        keys[numKeys] = key;
+        values[numKeys] = value;
+        numKeys++;
+
+    }
+
+    //SPLITS THIS LEAF NODE INTO 2 NODES, RETURNS THE NEW RIGHT NODE
+    public BTreeNode splitLeaf(long newBlockId) {
+        BTreeNode right = new BTreeNode(newBlockId, this.parentBlockId);
+
+        int mid = numKeys / 2; // middle index
+
+        int rightNum = numKeys - mid;
+        for (int i = 0; i < rightNum; i++) {
+            right.keys[i] = this.keys[mid + i];
+            right.values[i] = this.values[mid + i];
         }
 
-        keys[i + 1] = key;
-        values[i + 1] = value;
-        numKeys++;
+        right.numKeys = rightNum;
+        this.numKeys = mid; // shrink left node
+
+        return right;
     }
-
-
-    public boolean isOverflow() {
-        return numKeys > MAX_KEYS;
-    }
-
 
 }

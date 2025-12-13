@@ -30,9 +30,78 @@ public class Project3 {
                         System.out.println("Usage: java Project3 insert <insertFile> <key> <value>");
                         return;
                     }
-                    insert(args[1],
-                        Long.parseLong(args[2]),
-                        Long.parseLong(args[3]));
+
+                    String indexFile = args[1];
+                    long key = Long.parseLong(args[2]);
+                    long value = Long.parseLong(args[3]);
+
+                    try {
+                        BTreeFile btFile = new BTreeFile(indexFile, "rw");
+                        Header header = Header.fromFile(btFile);
+
+                        // CASE 1 - EMPTY TREE
+                        if (header.getRootBlockId() == 0) {
+                            long rootId = header.getNextBlockId();
+                            BTreeNode root = new BTreeNode(rootId, 0);
+                            root.insertIntoLeaf(key, value);
+
+                            btFile.writeBlock(rootId, root.toBytes());
+
+                            header.setRootBlockId(rootId);
+                            header.setNextBlockId(rootId + 1);
+                            btFile.writeBlock(0, header.toBytes());
+
+                            System.out.println("Inserted key " + key + " as root");
+                            btFile.close();
+                            return;
+                        }
+
+                        // CASE 2 - INSERT INTO EXISTING ROOT, LEAF ONLY TREE
+                        long rootId = header.getRootBlockId();
+                        BTreeNode root = BTreeNode.fromBytes(btFile.readBlock(rootId));
+                        root.insertIntoLeaf(key, value);
+
+                        // NO OVERFLOW SO JUST WRITE BACK
+                        if (!root.isOverflow()) {
+                            btFile.writeBlock(rootId, root.toBytes());
+                            System.out.println("Inserted key " + key + " into root");
+                            btFile.close();
+                            return;
+                        }
+
+                        // OVERFLOW SO SPLIT LEAF
+                        long rightId = header.getNextBlockId();
+                        BTreeNode right = root.splitLeaf(rightId);
+
+                        long promotedKey = right.keys[0];
+
+                        // NEW ROOT
+                        long newRootId = rightId + 1;
+                        BTreeNode newRoot = new BTreeNode(newRootId, 0);
+
+                        newRoot.keys[0] = promotedKey;
+                        newRoot.numKeys = 1;
+                        newRoot.children[0] = root.getBlockId();
+                        newRoot.children[1] = right.getBlockId();
+
+                        root.parentBlockId = newRootId;
+                        right.parentBlockId = newRootId;
+
+                        btFile.writeBlock(root.getBlockId(), root.toBytes());
+                        btFile.writeBlock(right.getBlockId(), right.toBytes());
+                        btFile.writeBlock(newRootId, newRoot.toBytes());
+
+                        header.setRootBlockId(newRootId);
+                        header.setNextBlockId(newRootId + 1);
+                        btFile.writeBlock(0, header.toBytes());
+
+                        System.out.println("Inserted key " + key + " with leaf split!");
+                        btFile.close();
+
+                    } catch (Exception e) {
+                        System.err.println("Insert failed: " + e.getMessage());
+                    }
+
                     break;
 
 
