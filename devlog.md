@@ -33,4 +33,24 @@ I'm pretty happy with the progress so far. For my next session, I am thinking to
 - add the key/value to the node & write it to disk & update the headers' nextBlockId
 - confirmation/testing/printing
 
+## 2025-12-12 07:00
+### Thoughts
+Okay nice! I think I could have been faster but I am glad with where I'm at right now. Now I will implement the full insert command & start doing proper work on BTreeNode to implement constructors for a new node etc
+
+### My Plan
+- implement the full insert command for the 1st key/value
+- BTreeNode work for support for minimal degree 10 w/keys, values & child pointers
+- serialzise the node to 512 bytes & write it to disk using BTreeFile
+- update headers nextBlockID and rootBlockID if needed
+- finally test all this
+
+## 2025-12-12 10:00
+### Thoughts
+Okay it's looking good! Implemented working insert command, header is now read from disk and updated correctly, basically end to end file I/O and node serialization is done for BTree index. It's a working index file! I want to do leaf node splitting & multiple inserts now, will be a preetty big commit.
+
+### My Plan
+- allow multiple keys per leaf & split when the capacity is exceeded
+-define node capacity, detect overflow, spilit leaves, update parent/root pointers accordingly
+
+ 
 
