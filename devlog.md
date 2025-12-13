@@ -24,3 +24,13 @@ Create command implementation is done! In a good workflow now. Going to add the 
 ### My Plan
 - set up BTree node structure & placeholder for insert command
 
+## 2025-12-12 06:15
+### Thoughts
+I'm pretty happy with the progress so far. For my next session, I am thinking to implement the insert command for one key/value in a new leaf node.
+
+### My Plan
+- read the header to get nextBlockID and create a new BTreeNOde
+- add the key/value to the node & write it to disk & update the headers' nextBlockId
+- confirmation/testing/printing
+
+
