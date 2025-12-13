@@ -26,6 +26,10 @@ public class Project3 {
                     break;
 
                 case "insert":
+                    if (args.length < 4) {
+                        System.out.println("Usage: java Project3 insert <filename> <key> <value>");
+                        return;
+                    }
                     System.out.println("Insert command (TO BE IMPLEMENTED!!t)");
                     break;
 

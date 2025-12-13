@@ -1,25 +1,39 @@
 package src;
 
+import java.nio.ByteBuffer;
+
 public class BTreeNode {
 
-    public static final int DEGREE = 10;
-    public static final int MAX_KEYS = 2 * DEGREE - 1;
+    public static final int DEGREE = 10; // minimum degree
+    public static final int MAX_KEYS = 2 * DEGREE - 1; //19 keys
+    public static final int MAX_CHILDREN = 2 * DEGREE;   // 20 child pointers
 
     public long blockId;
     public long parentBlockId;
     public int numKeys;
+    private long[] keys;
+    private long[] values;
+    private long[] children ; //block IDs of childre, 0 if leaf
 
-    public long[] keys = new long[MAX_KEYS];
-    public long[] values = new long[MAX_KEYS];
-    public long[] children = new long[MAX_KEYS + 1];
-
-    public BTreeNode() {
-        numKeys = 0;
-        blockId = 0;
-        parentBlockId = 0;
+    public BTreeNode(long blockId, long parentBlockId) {
+        this.blockId = blockId;
+        this.parentBlockId = parentBlockId;
+        this.numKeys = 0;
+        this.keys = new long[MAX_KEYS];
+        this.values = new long[MAX_KEYS] ;
+        this.children = new long[MAX_CHILDREN];
     }
 
-    // SERIALIZATION TO BE ADDED
+    public byte[] toBytes() {
+        ByteBuffer buffer = ByteBuffer.allocate(Header.BLOCK_SIZE);
+        buffer.putLong(blockId);
+        buffer.putLong(parentBlockId);
+        buffer.putLong(numKeys);
+        for (int i = 0; i < MAX_KEYS; i++) buffer.putLong(keys[i]);
+        for (int i = 0; i < MAX_KEYS; i++) buffer.putLong(values[i]);
+        for (int i = 0; i < MAX_CHILDREN; i++) buffer.putLong(children[i]);
+        return buffer.array();
+    }
 
 
 }
